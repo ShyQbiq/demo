@@ -229,8 +229,8 @@ export function PlanAnalysisDashboard() {
   const netAreaSegments = [
     { pct: 47, color: "#8EA8D8", label: "Primary" },
     { pct: 18, color: "#A3D9A5", label: "Collaboration" },
-    { pct: 21, color: "#E8A0C0", label: "Support" },
-    { pct: 0, color: "#F5D76E", label: "Amenities" },
+    { pct: 21, color: "#F5D76E", label: "Support" },
+    { pct: 0, color: "#E8A0C0", label: "Amenities" },
     { pct: 15, color: "#C5A3D9", label: "Speciality" },
   ];
 
