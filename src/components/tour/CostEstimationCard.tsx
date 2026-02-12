@@ -17,7 +17,7 @@ interface CostVariant {
 const VARIANTS: Record<string, CostVariant> = {
   "video-1": {
     title: "High-End Finishes",
-    subtitle: "Natural furniture collection · per 1,000 sqm",
+    subtitle: "Natural furniture collection · per 1,000 sqft",
     items: [
       { label: "Furniture Items", range: "$600K – $900K", icon: Armchair },
       { label: "Floors", range: "$250K – $350K", icon: Layers },
@@ -30,7 +30,7 @@ const VARIANTS: Record<string, CostVariant> = {
   },
   "video-2": {
     title: "High-End Finishes",
-    subtitle: "MIKEA furniture collection · per 1,000 sqm",
+    subtitle: "MIKEA furniture collection · per 1,000 sqft",
     items: [
       { label: "Furniture Items (MIKEA)", range: "$520K – $800K", icon: Armchair },
       { label: "Floors", range: "$250K – $350K", icon: Layers },
@@ -43,7 +43,7 @@ const VARIANTS: Record<string, CostVariant> = {
   },
   "video-3": {
     title: "Affordable Finishes",
-    subtitle: "Modern furniture · solid walls · per 1,000 sqm",
+    subtitle: "Modern furniture · solid walls · per 1,000 sqft",
     items: [
       { label: "Furniture (basic / MIKEA)", range: "$380K – $550K", icon: Armchair },
       { label: "Floors (vinyl / porcelain)", range: "$120K – $180K", icon: Layers },

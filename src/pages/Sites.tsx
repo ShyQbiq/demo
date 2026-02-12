@@ -64,18 +64,33 @@ const Sites = () => {
     if (confettiFiredRef.current) return;
     confettiFiredRef.current = true;
 
-    const duration = 1800;
+    const duration = 3200;
     const end = Date.now() + duration;
-    const frame = () => {
+
+    const burst = (originX: number, originY: number, count: number) => {
       confetti({
-        particleCount: 5,
-        startVelocity: 35,
-        spread: 70,
-        ticks: 200,
-        origin: { x: Math.random(), y: 0.1 },
+        particleCount: count,
+        startVelocity: 60,
+        spread: 100,
+        ticks: 300,
+        gravity: 0.9,
+        scalar: 1.1,
+        origin: { x: originX, y: originY },
       });
-      if (Date.now() < end) requestAnimationFrame(frame);
     };
+
+    const frame = () => {
+      burst(Math.random(), Math.random() * 0.3 + 0.05, 24);
+      burst(Math.random(), Math.random() * 0.3 + 0.05, 24);
+      if (Date.now() < end) {
+        requestAnimationFrame(frame);
+      } else {
+        burst(0.1, 0.2, 80);
+        burst(0.5, 0.2, 120);
+        burst(0.9, 0.2, 80);
+      }
+    };
+
     frame();
   }, [isFinalStep]);
 

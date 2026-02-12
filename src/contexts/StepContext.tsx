@@ -76,7 +76,7 @@ function getAutoAdvanceDelay(step: DemoStep): number {
           : sum,
       0
     );
-    return Math.max(totalLines * 500, 1800) + 500;
+    return Math.max(totalLines * 700, 2400) + 700;
   }
   return 700;
 }

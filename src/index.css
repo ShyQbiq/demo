@@ -4,6 +4,37 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  @keyframes thinking-wiggle {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-3px);
+    }
+  }
+
+  .thinking-dots {
+    display: inline-flex;
+    gap: 2px;
+    margin-left: 4px;
+  }
+
+  .thinking-dots span {
+    display: inline-block;
+    animation: thinking-wiggle 0.9s ease-in-out infinite;
+  }
+
+  .thinking-dots span:nth-child(2) {
+    animation-delay: 0.15s;
+  }
+
+  .thinking-dots span:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+}
+
 @layer base {
   :root {
     --background: 210 20% 98%;

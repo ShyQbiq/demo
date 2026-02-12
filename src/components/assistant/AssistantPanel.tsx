@@ -13,6 +13,9 @@ export function AssistantPanel() {
   const { chatHistory, suggestions, next } = useStep();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [input, setInput] = useState("");
+  const lastMsg = chatHistory[chatHistory.length - 1];
+  const isStudyOverviewActive =
+    lastMsg?.role === "assistant" && lastMsg.richContent === "study-recommendation";
 
   // Auto-scroll on any content change (including thinking line reveals)
   useEffect(() => {
@@ -63,9 +66,14 @@ export function AssistantPanel() {
   };
 
   return (
-    <aside className="w-[320px] shrink-0 border-r bg-card flex flex-col h-full">
+    <motion.aside
+      initial={false}
+      animate={{ width: isStudyOverviewActive ? 640 : 320 }}
+      transition={{ duration: 0.35, ease: "easeInOut" }}
+      className="shrink-0 border-r bg-card flex flex-col h-full text-[14px]"
+    >
       {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 text-[14px]">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
         {renderItems.map((item, i) =>
           item.kind === "thinking" ? (
             <ThinkingBubble
@@ -86,13 +94,13 @@ export function AssistantPanel() {
             <button
               key={s}
               onClick={handleSuggestionClick}
-              className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-            >
-              {s}
-            </button>
-          ))}
-        </div>
-      )}
+            className="w-full rounded-lg bg-primary px-4 py-2.5 text-[14px] font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+          >
+            {s}
+          </button>
+        ))}
+      </div>
+    )}
 
       {/* Input */}
       <div className="border-t p-3 shrink-0">
@@ -103,7 +111,7 @@ export function AssistantPanel() {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSend()}
             placeholder="Ask anything…"
-            className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+            className="flex-1 bg-transparent text-[14px] outline-none placeholder:text-muted-foreground"
           />
           <button
             onClick={handleSend}
@@ -114,18 +122,18 @@ export function AssistantPanel() {
           </button>
         </div>
       </div>
-    </aside>
+    </motion.aside>
   );
 }
 
 /* ─── Thinking Bubble ─── */
 
-function ThinkingBubble({ lines }: { lines: string[]; shouldCollapse: boolean }) {
+function ThinkingBubble({ lines, shouldCollapse }: { lines: string[]; shouldCollapse: boolean }) {
   const [revealedCount, setRevealedCount] = useState(1);
 
   // Space lines evenly across a total duration so they feel natural
-  const totalDuration = Math.max(lines.length * 500, 1800); // at least 1.8s total
-  const delayPerLine = lines.length > 1 ? totalDuration / lines.length : 600;
+  const totalDuration = Math.max(lines.length * 800, 2600); // at least 2.6s total
+  const delayPerLine = lines.length > 1 ? totalDuration / lines.length : 900;
 
   useEffect(() => {
     if (revealedCount >= lines.length) return;
@@ -135,8 +143,10 @@ function ThinkingBubble({ lines }: { lines: string[]; shouldCollapse: boolean })
     return () => clearTimeout(timer);
   }, [revealedCount, lines.length, delayPerLine]);
 
+  const showDots = !shouldCollapse;
+
   return (
-    <div className="text-sm text-muted-foreground italic leading-relaxed space-y-1">
+    <div className="text-[14px] text-muted-foreground italic leading-relaxed space-y-1">
       {lines.slice(0, revealedCount).map((line, i) => {
         const isLast = i === revealedCount - 1;
         return (
@@ -147,8 +157,17 @@ function ThinkingBubble({ lines }: { lines: string[]; shouldCollapse: boolean })
             transition={{ duration: 0.2 }}
             className="flex items-center gap-1.5"
           >
-            <span className="text-primary">✓</span>
-            <span>{line}</span>
+            <span className="text-emerald-700 font-extrabold">✓</span>
+            <span>
+              {line}
+              {isLast && showDots && (
+                <span className="thinking-dots" aria-label="thinking">
+                  <span>.</span>
+                  <span>.</span>
+                  <span>.</span>
+                </span>
+              )}
+            </span>
           </motion.div>
         );
       })}
@@ -169,10 +188,10 @@ function MessageBubble({ message }: { message: ChatMsg }) {
       transition={{ duration: 0.2 }}
       className={cn("flex flex-col", isUser ? "items-end" : "items-start")}
     >
-      <span className="text-[11px] font-medium text-muted-foreground mb-1 px-1">{label}</span>
+      <span className="text-[12px] font-medium text-muted-foreground mb-1 px-1">{label}</span>
       <div
         className={cn(
-          "max-w-[85%] rounded-xl px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-line",
+          "max-w-[85%] rounded-xl px-3.5 py-2.5 text-[14px] leading-relaxed whitespace-pre-line",
           isUser
             ? "bg-primary text-primary-foreground rounded-br-sm"
             : "bg-muted text-foreground rounded-bl-sm"
@@ -235,7 +254,7 @@ function StudyRecommendationCard() {
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: 0.15 }}
-      className="mt-2 w-full rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden text-xs"
+      className="mt-2 w-full rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden text-[14px]"
     >
       {visibleSections >= 1 && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }} className="bg-primary/10 px-3 py-2 border-b">

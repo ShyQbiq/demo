@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useEffect, useMemo, useState } from "react";
 import { Lightbulb, Users, TriangleAlert } from "lucide-react";
 import analyticPlan1 from "@/assets/analytic-plan-1.png";
 import analyticPlan2 from "@/assets/analytic-plan-2.png";
@@ -8,6 +9,33 @@ const fade = (i: number) => ({
   animate: { opacity: 1, y: 0 },
   transition: { delay: 0.05 * i, duration: 0.3 },
 });
+
+const formatNumber = (value: number) =>
+  new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(value);
+
+const useCountUp = (target: number, durationMs = 1000) => {
+  const [value, setValue] = useState(0);
+
+  useEffect(() => {
+    let frameId = 0;
+    const start = performance.now();
+
+    const tick = (now: number) => {
+      const elapsed = now - start;
+      const t = Math.min(elapsed / durationMs, 1);
+      const eased = 1 - Math.pow(1 - t, 3);
+      setValue(Math.round(target * eased));
+      if (t < 1) {
+        frameId = requestAnimationFrame(tick);
+      }
+    };
+
+    frameId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frameId);
+  }, [target, durationMs]);
+
+  return value;
+};
 
 /* ─── tiny donut via SVG ─── */
 const MiniDonut = ({
@@ -25,7 +53,7 @@ const MiniDonut = ({
       {segments.map((s, i) => {
         const dash = (s.pct / 100) * c;
         const el = (
-          <circle
+          <motion.circle
             key={i}
             cx="50"
             cy="50"
@@ -33,7 +61,9 @@ const MiniDonut = ({
             fill="none"
             stroke={s.color}
             strokeWidth="18"
-            strokeDasharray={`${dash} ${c - dash}`}
+            initial={{ strokeDasharray: `0 ${c}` }}
+            animate={{ strokeDasharray: `${dash} ${c - dash}` }}
+            transition={{ duration: 0.8, delay: 0.1 * i, ease: "easeOut" }}
             strokeDashoffset={-offset}
             transform="rotate(-90 50 50)"
           />
@@ -84,9 +114,12 @@ const BenchmarkBar = ({
   <div className="flex items-center gap-2 text-[11px]">
     <span className="w-24 text-muted-foreground">{label}</span>
     <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-      <div
+      <motion.div
         className="h-full rounded-full"
-        style={{ width: `${value}%`, backgroundColor: color }}
+        initial={{ width: 0 }}
+        animate={{ width: `${value}%` }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        style={{ backgroundColor: color }}
       />
     </div>
     <span className="text-[10px] text-muted-foreground w-16">{benchmark}</span>
@@ -100,17 +133,20 @@ const KpiTile = ({
   sub,
 }: {
   label: string;
-  value: string;
+  value: number;
   sub?: string;
-}) => (
-  <div className="rounded-lg border bg-card p-3">
+}) => {
+  const count = useCountUp(value, 2000);
+  return (
+    <div className="rounded-lg border bg-card p-3">
     <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
       {label}
     </p>
-    <p className="text-lg font-bold mt-0.5">{value}</p>
+      <p className="text-lg font-bold mt-0.5 tabular-nums">{formatNumber(count)}</p>
     {sub && <p className="text-[10px] text-muted-foreground">{sub}</p>}
-  </div>
-);
+    </div>
+  );
+};
 
 const DensityTile = ({
   label,
@@ -155,14 +191,13 @@ const SeatTypeRow = ({
     </div>
     <div className="flex gap-0.5 h-2">
       {bars.map((b, i) => (
-        <div
+        <motion.div
           key={i}
           className="h-full rounded-sm"
-          style={{
-            width: `${(b.value / 200) * 100}%`,
-            backgroundColor: b.color,
-            minWidth: b.value > 0 ? 4 : 0,
-          }}
+          initial={{ width: 0 }}
+          animate={{ width: `${(b.value / 200) * 100}%` }}
+          transition={{ duration: 0.8, ease: "easeOut", delay: 0.05 * i }}
+          style={{ backgroundColor: b.color, minWidth: b.value > 0 ? 4 : 0 }}
         />
       ))}
     </div>
@@ -182,6 +217,15 @@ const SeatTypeRow = ({
 
 /* ═══════ MAIN COMPONENT ═══════ */
 export function PlanAnalysisDashboard() {
+  const kpis = useMemo(
+    () => [
+      { label: "Total Area", value: 27770, sub: "sqf" },
+      { label: "Usable Area", value: 23153, sub: "/ 27,770 sqf" },
+      { label: "Net Area", value: 18088, sub: "/ 27,770 sqf" },
+      { label: "Headcount", value: 193 },
+    ],
+    []
+  );
   const netAreaSegments = [
     { pct: 47, color: "#8EA8D8", label: "Primary" },
     { pct: 18, color: "#A3D9A5", label: "Collaboration" },
@@ -212,10 +256,9 @@ export function PlanAnalysisDashboard() {
 
       {/* KPI Row */}
       <motion.div {...fade(1)} className="grid grid-cols-4 gap-3">
-        <KpiTile label="Total Area" value="27,770" sub="sqf" />
-        <KpiTile label="Usable Area" value="23,153" sub="/ 27,770 sqf" />
-        <KpiTile label="Net Area" value="18,088" sub="/ 27,770 sqf" />
-        <KpiTile label="Headcount" value="193" />
+        {kpis.map((kpi) => (
+          <KpiTile key={kpi.label} label={kpi.label} value={kpi.value} sub={kpi.sub} />
+        ))}
       </motion.div>
 
       {/* Insights */}
