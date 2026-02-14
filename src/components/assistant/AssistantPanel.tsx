@@ -10,12 +10,21 @@ type RenderItem =
   | { kind: "message"; msg: ChatMsg };
 
 export function AssistantPanel() {
-  const { chatHistory, suggestions, next } = useStep();
+  const { chatHistory, suggestions, next, currentStepIndex } = useStep();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [input, setInput] = useState("");
   const lastMsg = chatHistory[chatHistory.length - 1];
   const isStudyOverviewActive =
     lastMsg?.role === "assistant" && lastMsg.richContent === "study-recommendation";
+  const openingSuggestions = [
+    "Explore new site",
+    "Compare a few available sites",
+    "Review portfolio insights",
+  ];
+  const visibleSuggestions =
+    currentStepIndex === 0 && suggestions.length === 0
+      ? openingSuggestions
+      : suggestions;
 
   // Auto-scroll on any content change (including thinking line reveals)
   useEffect(() => {
@@ -70,7 +79,7 @@ export function AssistantPanel() {
       initial={false}
       animate={{ width: isStudyOverviewActive ? 640 : 320 }}
       transition={{ duration: 0.35, ease: "easeInOut" }}
-      className="shrink-0 border-r bg-card flex flex-col h-full text-[14px]"
+      className="shrink-0 border-r bg-card flex flex-col h-full text-[16px]"
     >
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -88,13 +97,13 @@ export function AssistantPanel() {
       </div>
 
       {/* CTA suggestion buttons */}
-      {suggestions.length > 0 && (
+      {visibleSuggestions.length > 0 && (
         <div className="flex flex-col gap-2 px-4 pb-2 shrink-0">
-          {suggestions.map((s) => (
+          {visibleSuggestions.map((s) => (
             <button
               key={s}
               onClick={handleSuggestionClick}
-            className="w-full rounded-lg bg-primary px-4 py-2.5 text-[14px] font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+            className="w-full rounded-lg bg-primary px-4 py-2.5 text-[16px] font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
           >
             {s}
           </button>
@@ -111,7 +120,7 @@ export function AssistantPanel() {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSend()}
             placeholder="Ask anything…"
-            className="flex-1 bg-transparent text-[14px] outline-none placeholder:text-muted-foreground"
+            className="flex-1 bg-transparent text-[16px] outline-none placeholder:text-muted-foreground"
           />
           <button
             onClick={handleSend}
@@ -146,7 +155,7 @@ function ThinkingBubble({ lines, shouldCollapse }: { lines: string[]; shouldColl
   const showDots = !shouldCollapse;
 
   return (
-    <div className="text-[14px] text-muted-foreground italic leading-relaxed space-y-1">
+    <div className="text-[16px] text-muted-foreground italic leading-relaxed space-y-1">
       {lines.slice(0, revealedCount).map((line, i) => {
         const isLast = i === revealedCount - 1;
         return (
@@ -188,10 +197,10 @@ function MessageBubble({ message }: { message: ChatMsg }) {
       transition={{ duration: 0.2 }}
       className={cn("flex flex-col", isUser ? "items-end" : "items-start")}
     >
-      <span className="text-[12px] font-medium text-muted-foreground mb-1 px-1">{label}</span>
+      <span className="text-[13px] font-medium text-muted-foreground mb-1 px-1">{label}</span>
       <div
         className={cn(
-          "max-w-[85%] rounded-xl px-3.5 py-2.5 text-[14px] leading-relaxed whitespace-pre-line",
+          "max-w-[85%] rounded-xl px-3.5 py-2.5 text-[16px] leading-relaxed whitespace-pre-line",
           isUser
             ? "bg-primary text-primary-foreground rounded-br-sm"
             : "bg-muted text-foreground rounded-bl-sm"
