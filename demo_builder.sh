@@ -4,7 +4,7 @@ mkdir -p ./build_context
 
 
 # 3. Build the docker image
-docker build --platform=linux/amd64 -t demo-project:latest .
+docker build --platform=linux/x86_64 -t demo-project:latest .
 
 # pushing the docker image into aws. if you want to run it locally, please comment out the next two lines.
 
